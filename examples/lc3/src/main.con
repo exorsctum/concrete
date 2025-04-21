@@ -77,6 +77,43 @@ mod lc3 {
         ConditionFlags,
     }
 
+    impl Register {
+        pub fn discriminant(self) -> u64 {
+            match self {
+                Register#R0 => {
+                    return 0;
+                },
+                Register#R1 => {
+                    return 1;
+                },
+                Register#R2 => {
+                    return 2;
+                },
+                Register#R3 => {
+                    return 3;
+                },
+                Register#R4 => {
+                    return 4;
+                },
+                Register#R5 => {
+                    return 5;
+                },
+                Register#R6 => {
+                    return 6;
+                },
+                Register#R7 => {
+                    return 7;
+                },
+                Register#ProgramCounter => {
+                    return 8;
+                },
+                Register#ConditionFlags => {
+                    return 9;
+                },
+            }
+        }
+    }
+
     enum OpCodes {
         Branch = 0,
         Add,
