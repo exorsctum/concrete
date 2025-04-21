@@ -133,6 +133,61 @@ mod lc3 {
         ExecuteTrap,
     }
 
+    impl OpCodes {
+        pub fn discriminant(self) -> u64 {
+            match self {
+                OpCodes#Branch => {
+                    return 0;
+                },
+                OpCodes#Add => {
+                    return 1;
+                },
+                OpCodes#Load => {
+                    return 2;
+                },
+                OpCodes#Store => {
+                    return 3;
+                },
+                OpCodes#JumpRegister => {
+                    return 4;
+                },
+                OpCodes#BitwiseAnd => {
+                    return 5;
+                },
+                OpCodes#LoadRegister => {
+                    return 6;
+                },
+                OpCodes#StoreRegister => {
+                    return 7;
+                },
+                OpCodes#Unused => {
+                    return 8;
+                },
+                OpCodes#BitwiseNot => {
+                    return 9;
+                },
+                OpCodes#LoadIndirect => {
+                    return 10;
+                },
+                OpCodes#StoreIndirect => {
+                    return 11;
+                },
+                OpCodes#Jump => {
+                    return 12;
+                },
+                OpCodes#Reserved => {
+                    return 13;
+                },
+                OpCodes#LoadEffectiveAddress => {
+                    return 14;
+                },
+                OpCodes#ExecuteTrap => {
+                    return 15;
+                },
+            }
+        }
+    }
+
     enum ConditionFlags {
         Positive = 0,
         Zero = 2,
