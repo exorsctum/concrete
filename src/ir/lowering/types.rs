@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tracing::{debug, instrument};
 
 use crate::{
-    ast::types::TypeDescriptor,
+    ast::types::{TypeDecl, TypeDescriptor},
     ir::lowering::{Symbol, adts::lower_enum},
 };
 
@@ -72,6 +72,11 @@ pub(crate) fn lower_type(
             "String" => *builder.ir.builtin_types.get(&Type::String).unwrap(),
             "char" => *builder.ir.builtin_types.get(&Type::Char).unwrap(),
             other => {
+                // Check if it exists in the type aliases
+                if let Some(ty) = builder.get_current_symbols().types.get(other) {
+                    return Ok(*ty);
+                }
+
                 // Check if the type name exists in the generic map.
                 if let Some(ty) = builder.context.generics_mapping.get(other).copied() {
                     debug!(
@@ -82,11 +87,14 @@ pub(crate) fn lower_type(
                     return Ok(ty);
                 }
 
-                let module_idx = builder.get_current_module_idx();
+                {
+                    let type_module_idx = builder.get_path_module_idx(&name.path)?;
+                    builder.enter_module_context(type_module_idx);
+                }
 
                 let symbols = builder
                     .symbols
-                    .get(&module_idx)
+                    .get(&builder.get_current_module_idx())
                     .expect("failed to get symbols for module");
 
                 // Find using the polymorphic symbol.
@@ -143,7 +151,7 @@ pub(crate) fn lower_type(
                         sym.generics = generics.clone();
 
                         // for borrowck
-                        let symbols = builder.symbols.get(&module_idx).unwrap();
+                        let symbols = builder.get_current_symbols();
 
                         // Get the monomorphized adt id or lower it.
                         let mono_adt_idx = if let Some(mono_struct_idx) =
@@ -158,11 +166,11 @@ pub(crate) fn lower_type(
 
                             // Store them.
                             builder.adt_to_type_idx.insert(mono_adt_idx, type_id);
-                            builder.type_to_module.insert(type_id, module_idx);
                             builder
-                                .symbols
-                                .get_mut(&builder.get_current_module_idx())
-                                .unwrap()
+                                .type_to_module
+                                .insert(type_id, builder.get_current_module_idx());
+                            builder
+                                .get_current_symbols_mut()
                                 .aggregates
                                 .insert(sym.clone(), mono_adt_idx);
 
@@ -220,14 +228,18 @@ pub(crate) fn lower_type(
                             builder.context.generics_mapping = generics_mapping;
                         }
 
+                        builder.leave_module_context();
+
                         *builder
                             .adt_to_type_idx
                             .get(&mono_adt_idx)
                             .expect("should have a type idx")
                     } else {
+                        builder.leave_module_context();
                         adt_type_idx
                     }
                 } else {
+                    builder.leave_module_context();
                     Err(LoweringError::UnrecognizedType {
                         span: *span,
                         name: other.to_string(),
@@ -283,4 +295,24 @@ pub(crate) fn lower_type(
             }
         }
     })
+}
+
+/// Lowers a type alias.
+#[instrument(skip_all)]
+pub(crate) fn lower_type_decl(
+    builder: &mut IRBuilder,
+    type_decl: &TypeDecl,
+) -> Result<TypeIndex, LoweringError> {
+    let result_ty = lower_type(builder, &type_decl.value)?;
+    debug!(
+        "Added type alias {} -> {}",
+        type_decl.name.name,
+        result_ty.to_idx()
+    );
+
+    let sym = builder.get_current_symbols_mut();
+
+    sym.types.insert(type_decl.name.name.clone(), result_ty);
+
+    Ok(result_ty)
 }
