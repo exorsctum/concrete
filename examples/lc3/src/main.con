@@ -77,6 +77,25 @@ mod lc3 {
         ConditionFlags,
     }
 
+    enum OpCodes {
+        Branch = 0,
+        Add,
+        Load,
+        Store,
+        JumpRegister,
+        BitwiseAnd,
+        LoadRegister,
+        StoreRegister,
+        Unused,
+        BitwiseNot,
+        LoadIndirect,
+        StoreIndirect,
+        Jump,
+        Reserved,
+        LoadEffectiveAddress,
+        ExecuteTrap,
+    }
+
     pub fn main() -> u16 {
         let mut memory: Memory = Memory#new();
 
