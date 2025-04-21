@@ -158,8 +158,8 @@ mod lc3 {
         let read: u64 = fread(origin_ptr as *mut u8, 2, max_read, file);
         fclose(file);
 
-        truncate("memory");
-        dump("memory", memory.at(0) as *const u8, (origin as u64) * 2 + read * 2);
+        truncate("image");
+        dump("image", memory.at(0) as *const u8, (origin as u64) * 2 + read * 2);
 
         let mut current_ptr: *mut u16 = origin_ptr;
         let mut remaining_to_swap: u64 = read;
@@ -169,10 +169,28 @@ mod lc3 {
             remaining_to_swap = remaining_to_swap - 1;
         }
 
-        truncate("swapped");
-        dump("swapped", memory.at(0) as *const u8, (origin as u64) * 2 + read * 2);
+        truncate("memory");
+        dump("memory", memory.at(0) as *const u8, (origin as u64) * 2 + read * 2);
 
-        let registers: [u16; 10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let mut registers: [u16; 10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        let pc: Register = Register#ProgramCounter;
+        registers[pc.discriminant()] = 12288;
+
+        let mut running: bool = true;
+        while running {
+            let instruction: u16 = memory.get(registers[pc.discriminant()]);
+            let opcode: u16 = lsr(instruction, 12);
+
+            if false {
+                running = true;
+            } else {
+                running = false;
+            }
+        }
+
+        truncate("final");
+        dump("final", memory.at(0) as *const u8, 65536 * 2);
 
         return 0;
     }
