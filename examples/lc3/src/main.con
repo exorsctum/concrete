@@ -112,8 +112,9 @@ mod lc3 {
             exit(1);
         }
 
-        let origin: u16 = 0;
+        let mut origin: u16 = 0;
         fread(&origin as *mut u8, 2, 1, file);
+        origin = swap16(origin);
 
         let max_read: u64 = 65536 - (origin as u64);
         let origin_ptr: *mut u16 = memory.at(origin);
