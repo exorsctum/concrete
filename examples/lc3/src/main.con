@@ -5,6 +5,7 @@ mod lc3 {
     extern fn fread(ptr: *mut u8, size: u64, nitems: u64, stream: *mut u8) -> u64;
     extern fn fwrite(ptr: *const u8, size: u64, nitems: u64, stream: *mut u8) -> u64;
     extern fn puts(ptr: *mut u8) -> i32;
+    extern fn putchar(c: u8) -> i32;
     extern fn exit(status: i32);
 
     struct Memory {
@@ -332,6 +333,8 @@ mod lc3 {
 
         let pc: Register = Register#ProgramCounter;
         let cond: Register = Register#ConditionFlags;
+        let r7: Register = Register#R7;
+        let r0: Register = Register#R0;
         registers[pc.discriminant()] = 12288;
 
         truncate("instructions");
@@ -392,7 +395,7 @@ mod lc3 {
                 OpCodes#LoadEffectiveAddress => {
                     let register: u16 = and(lsr(instruction, 9), 7);
                     let pc_offset: u16 = asr(lsl(instruction, 7) as i16, 7) as u16;
-                    registers[register] = register[pc.discriminant()] + pc_offset;
+                    registers[register] = registers[pc.discriminant()] + pc_offset;
 
                     if registers[register] == 0 {
                         registers[cond.discriminant()] = 0;
@@ -405,7 +408,30 @@ mod lc3 {
                     }
                 },
                 OpCodes#ExecuteTrap => {
-                    return 15;
+                    registers[r7.discriminant()] = registers[pc.discriminant()];
+                    let trap_instruction: u16 = and(instruction, 255);
+
+                    if trap_instruction == 34 {
+                        let start: u16 = registers[r0.discriminant()];
+
+                        let mut p_c: *mut u16 = memory.at(start);
+                        let mut c: u8  = *p_c as u8;
+
+
+                        // c != 0 does not work!! why?
+                        while c > 0 {
+                            putchar(c as u8);
+                            p_c = p_c + 1;
+                            c = *p_c as u8;
+                        }
+
+                        
+                    } else {
+                        if trap_instruction == 37 {
+                            print("HALT");
+                            running = false;
+                        }
+                    }
                 }
             }
         }
