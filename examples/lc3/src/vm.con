@@ -2,7 +2,7 @@ mod vm {
     import std.libc.{exit, putchar};
     import std.io.{print};
     import builtins.{lsr, lsl, asr, and};
-    import debug.{dump_memory, truncate_file};
+    import debug.{debug_string, dump_memory, truncate_file};
     import lc3.memory.{Memory};
 
     const MEMORY_SIZE: u64 = 65536;
@@ -108,58 +108,72 @@ mod vm {
                 // FIX: Cannot use const in binary expression
                 let opcode_br: u16 = OPCODE_BR as u16;
                 if opcode == opcode_br {
+                    debug_string("opcode_br");
                     exit(opcode as i32);
                 };
                 let opcode_add: u16 = OPCODE_ADD as u16;
                 if opcode == opcode_add {
+                    debug_string("opcode_add");
                     exit(opcode as i32);
                 };
                 let opcode_ld: u16 = OPCODE_LD as u16;
                 if opcode == opcode_ld {
+                    debug_string("opcode_ld");
                     exit(opcode as i32);
                 };
                 let opcode_st: u16 = OPCODE_ST as u16;
                 if opcode == opcode_st {
+                    debug_string("opcode_st");
                     exit(opcode as i32);
                 };
                 let opcode_jsr: u16 = OPCODE_JSR as u16;
                 if opcode == opcode_jsr {
+                    debug_string("opcode_jsr");
                     exit(opcode as i32);
                 };
                 let opcode_and: u16 = OPCODE_AND as u16;
                 if opcode == opcode_and {
+                    debug_string("opcode_and");
                     exit(opcode as i32);
                 };
                 let opcode_ldr: u16 = OPCODE_LDR as u16;
                 if opcode == opcode_ldr {
+                    debug_string("opcode_ldr");
                     exit(opcode as i32);
                 };
                 let opcode_str: u16 = OPCODE_STR as u16;
                 if opcode == opcode_str {
+                    debug_string("opcode_str");
                     exit(opcode as i32);
                 };
                 let opcode_rti: u16 = OPCODE_RTI as u16;
                 if opcode == opcode_rti {
+                    debug_string("opcode_rti");
                     exit(opcode as i32);
                 };
                 let opcode_not: u16 = OPCODE_NOT as u16;
                 if opcode == opcode_not {
+                    debug_string("opcode_not");
                     exit(opcode as i32);
                 };
                 let opcode_ldi: u16 = OPCODE_LDI as u16;
                 if opcode == opcode_ldi {
+                    debug_string("opcode_ldi");
                     exit(opcode as i32);
                 };
                 let opcode_sti: u16 = OPCODE_STI as u16;
                 if opcode == opcode_sti {
+                    debug_string("opcode_sti");
                     exit(opcode as i32);
                 };
                 let opcode_jmp: u16 = OPCODE_JMP as u16;
                 if opcode == opcode_jmp {
+                    debug_string("opcode_jmp");
                     exit(opcode as i32);
                 };
                 let opcode_res: u16 = OPCODE_RES as u16;
                 if opcode == opcode_res {
+                    debug_string("opcode_res");
                     exit(opcode as i32);
                 };
                 let opcode_lea: u16 = OPCODE_LEA as u16;
@@ -177,10 +191,12 @@ mod vm {
 
                     let trap_getc: u16 = TRAP_GETC;
                     if trap_code == trap_getc {
+                        debug_string("trap_getc");
                         exit(trap_code as i32);
                     }
                     let trap_out: u16 = TRAP_OUT;
                     if trap_code == trap_out {
+                        debug_string("trap_out");
                         exit(trap_code as i32);
                     }
                     let trap_puts: u16 = TRAP_PUTS;
@@ -196,10 +212,12 @@ mod vm {
                     }
                     let trap_in: u16 = TRAP_IN;
                     if trap_code == trap_in {
+                        debug_string("trap_in");
                         exit(trap_code as i32);
                     }
                     let trap_putsp: u16 = TRAP_PUTSP;
                     if trap_code == trap_putsp {
+                        debug_string("trap_putsp");
                         exit(trap_code as i32);
                     }
                     let trap_halt: u16 = TRAP_HALT;
