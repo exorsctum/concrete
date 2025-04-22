@@ -80,7 +80,7 @@ mod vm {
             memory.load(image_path);
         }
 
-        pub fn run(&mut self) -> i32 {
+        pub fn run(&mut self) {
             // FIX: Cannot inline memory. The workaround only works
             // because the memory is heap allocated.
             let mut memory: Memory = self.memory;
@@ -108,59 +108,59 @@ mod vm {
                 // FIX: Cannot use const in binary expression
                 let opcode_br: u16 = OPCODE_BR as u16;
                 if opcode == opcode_br {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_add: u16 = OPCODE_ADD as u16;
                 if opcode == opcode_add {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_ld: u16 = OPCODE_LD as u16;
                 if opcode == opcode_ld {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_st: u16 = OPCODE_ST as u16;
                 if opcode == opcode_st {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_jsr: u16 = OPCODE_JSR as u16;
                 if opcode == opcode_jsr {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_and: u16 = OPCODE_AND as u16;
                 if opcode == opcode_and {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_ldr: u16 = OPCODE_LDR as u16;
                 if opcode == opcode_ldr {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_str: u16 = OPCODE_STR as u16;
                 if opcode == opcode_str {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_rti: u16 = OPCODE_RTI as u16;
                 if opcode == opcode_rti {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_not: u16 = OPCODE_NOT as u16;
                 if opcode == opcode_not {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_ldi: u16 = OPCODE_LDI as u16;
                 if opcode == opcode_ldi {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_sti: u16 = OPCODE_STI as u16;
                 if opcode == opcode_sti {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_jmp: u16 = OPCODE_JMP as u16;
                 if opcode == opcode_jmp {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_res: u16 = OPCODE_RES as u16;
                 if opcode == opcode_res {
-                    return opcode as i32;
+                    exit(opcode as i32);
                 };
                 let opcode_lea: u16 = OPCODE_LEA as u16;
                 if opcode == opcode_lea {
@@ -187,11 +187,11 @@ mod vm {
 
                     let trap_getc: u16 = TRAP_GETC;
                     if trap_code == trap_getc {
-                        return trap_code as i32;
+                        exit(trap_code as i32);
                     }
                     let trap_out: u16 = TRAP_OUT;
                     if trap_code == trap_out {
-                        return trap_code as i32;
+                        exit(trap_code as i32);
                     }
                     let trap_puts: u16 = TRAP_PUTS;
                     if trap_code == trap_puts {
@@ -206,19 +206,21 @@ mod vm {
                     }
                     let trap_in: u16 = TRAP_IN;
                     if trap_code == trap_in {
-                        return trap_code as i32;
+                        exit(trap_code as i32);
                     }
                     let trap_putsp: u16 = TRAP_PUTSP;
                     if trap_code == trap_putsp {
-                        return trap_code as i32;
+                        exit(trap_code as i32);
                     }
                     let trap_halt: u16 = TRAP_HALT;
                     if trap_code == trap_halt {
                         let msg: String = "HALT";
                         print(&msg);
-                        return 0;
+                        return;
                     }
+                    // FIX: Add else clause
                 }
+                // FIX: Add else clause
             }
         }
     }

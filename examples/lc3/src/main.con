@@ -8,7 +8,8 @@ mod lc3 {
     pub fn main() -> i32 {
         let vm: VirtualMachine = VirtualMachine#new();
         vm.load("asm/hello_world.obj");
-        return vm.run();
+        vm.run();
+        return 0;
     }
 }
 
