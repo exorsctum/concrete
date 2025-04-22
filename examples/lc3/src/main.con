@@ -446,11 +446,13 @@ mod builtins {
         let mut i: u16 = 0;
         let mut z: u16 = 0;
         while i < 16 {
+            // keep bit at index i
             let xi: u16 = lsr(lsl(x, 15 - i), 15);
             let yi: u16 = lsr(lsl(y, 15 - i), 15);
             // cannot use and gates in conditional
             if xi > 0 {
                 if yi > 0 {
+                    // set bit at index i on z
                     z = z + lsl(1, i);
                 }
             }
