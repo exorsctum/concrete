@@ -36,203 +36,45 @@ mod lc3 {
         return lsl(x, 8) + lsr(x, 8);
     }
 
-    enum Register {
-        R0 = 0,
-        R1,
-        R2,
-        R3,
-        R4,
-        R5,
-        R6,
-        R7,
-        ProgramCounter,
-        ConditionFlags,
-    }
+    const MEMORY_SIZE: u64 = 65536;
+    const REGISTER_SIZE: u64 = 10;
 
-    impl Register {
-        pub fn discriminant(self) -> u64 {
-            match self {
-                Register#R0 => {
-                    return 0;
-                },
-                Register#R1 => {
-                    return 1;
-                },
-                Register#R2 => {
-                    return 2;
-                },
-                Register#R3 => {
-                    return 3;
-                },
-                Register#R4 => {
-                    return 4;
-                },
-                Register#R5 => {
-                    return 5;
-                },
-                Register#R6 => {
-                    return 6;
-                },
-                Register#R7 => {
-                    return 7;
-                },
-                Register#ProgramCounter => {
-                    return 8;
-                },
-                Register#ConditionFlags => {
-                    return 9;
-                },
-            }
-        }
-    }
+    // FIX: It would be great to use an Enum here
+    const REGISTER_R0: u64 = 0;
+    const REGISTER_R1: u64 = 1;
+    const REGISTER_R2: u64 = 2;
+    const REGISTER_R3: u64 = 3;
+    const REGISTER_R4: u64 = 4;
+    const REGISTER_R5: u64 = 5;
+    const REGISTER_R6: u64 = 6;
+    const REGISTER_R7: u64 = 7;
+    const REGISTER_PC: u64 = 8;
+    const REGISTER_COND: u64 = 9;
 
-    enum OpCodes {
-        Branch = 0,
-        Add,
-        Load,
-        Store,
-        JumpRegister,
-        BitwiseAnd,
-        LoadRegister,
-        StoreRegister,
-        Unused,
-        BitwiseNot,
-        LoadIndirect,
-        StoreIndirect,
-        Jump,
-        Reserved,
-        LoadEffectiveAddress,
-        ExecuteTrap,
-    }
+    // FIX: It would be great to use an Enum here
+    const OPCODE_BR: u16 = 0;
+    const OPCODE_ADD: u16 = 1;
+    const OPCODE_LD: u16 = 2;
+    const OPCODE_ST: u16 = 3;
+    const OPCODE_JSR: u16 = 4;
+    const OPCODE_AND: u16 = 5;
+    const OPCODE_LDR: u16 = 6;
+    const OPCODE_STR: u16 = 7;
+    const OPCODE_RTI: u16 = 8;
+    const OPCODE_NOT: u16 = 9;
+    const OPCODE_LDI: u16 = 10;
+    const OPCODE_STI: u16 = 11;
+    const OPCODE_JMP: u16 = 12;
+    const OPCODE_RES: u16 = 13;
+    const OPCODE_LEA: u16 = 14;
+    const OPCODE_TRA: u16 = 15;
 
-    impl OpCodes {
-        pub fn discriminant(self) -> u64 {
-            match self {
-                OpCodes#Branch => {
-                    return 0;
-                },
-                OpCodes#Add => {
-                    return 1;
-                },
-                OpCodes#Load => {
-                    return 2;
-                },
-                OpCodes#Store => {
-                    return 3;
-                },
-                OpCodes#JumpRegister => {
-                    return 4;
-                },
-                OpCodes#BitwiseAnd => {
-                    return 5;
-                },
-                OpCodes#LoadRegister => {
-                    return 6;
-                },
-                OpCodes#StoreRegister => {
-                    return 7;
-                },
-                OpCodes#Unused => {
-                    return 8;
-                },
-                OpCodes#BitwiseNot => {
-                    return 9;
-                },
-                OpCodes#LoadIndirect => {
-                    return 10;
-                },
-                OpCodes#StoreIndirect => {
-                    return 11;
-                },
-                OpCodes#Jump => {
-                    return 12;
-                },
-                OpCodes#Reserved => {
-                    return 13;
-                },
-                OpCodes#LoadEffectiveAddress => {
-                    return 14;
-                },
-                OpCodes#ExecuteTrap => {
-                    return 15;
-                },
-            }
-        }
-    }
+    // FIX: It would be great to use an Enum here
+    const CONDITION_FLAG_POS: u16 = 0;
+    const CONDITION_FLAG_ZERO: u16 = 2;
+    const CONDITION_FLAG_NEG: u16 = 4;
 
-    fn opcode_from_discriminant(x: u16) -> OpCodes {
-        if x == 0 {
-            let opcode: OpCodes = OpCodes#Branch;
-            return opcode;
-        }
-        if x == 1 {
-            let opcode: OpCodes = OpCodes#Add;
-            return opcode;
-        }
-        if x == 2 {
-            let opcode: OpCodes = OpCodes#Load;
-            return opcode;
-        }
-        if x == 3 {
-            let opcode: OpCodes = OpCodes#Store;
-            return opcode;
-        }
-        if x == 4 {
-            let opcode: OpCodes = OpCodes#JumpRegister;
-            return opcode;
-        }
-        if x == 5 {
-            let opcode: OpCodes = OpCodes#BitwiseAnd;
-            return opcode;
-        }
-        if x == 6 {
-            let opcode: OpCodes = OpCodes#LoadRegister;
-            return opcode;
-        }
-        if x == 7 {
-            let opcode: OpCodes = OpCodes#StoreRegister;
-            return opcode;
-        }
-        if x == 8 {
-            let opcode: OpCodes = OpCodes#Unused;
-            return opcode;
-        }
-        if x == 9 {
-            let opcode: OpCodes = OpCodes#BitwiseNot;
-            return opcode;
-        }
-        if x == 10 {
-            let opcode: OpCodes = OpCodes#LoadIndirect;
-            return opcode;
-        }
-        if x == 11 {
-            let opcode: OpCodes = OpCodes#StoreIndirect;
-            return opcode;
-        }
-        if x == 12 {
-            let opcode: OpCodes = OpCodes#Jump;
-            return opcode;
-        }
-        if x == 13 {
-            let opcode: OpCodes = OpCodes#Reserved;
-            return opcode;
-        }
-        if x == 14 {
-            let opcode: OpCodes = OpCodes#LoadEffectiveAddress;
-            return opcode;
-        }
-        if x == 15 {
-            let opcode: OpCodes = OpCodes#ExecuteTrap;
-            return opcode;
-        }
-        exit(1);
-    }
-
-    enum ConditionFlags {
-        Positive = 0,
-        Zero = 2,
-        Negative = 4,
-    }
+    const INITIAL_PC: u16 = 12288;
 
     pub fn main() -> u16 {
         let mut memory: Memory = Memory#new();
@@ -264,114 +106,128 @@ mod lc3 {
         truncate_file("image");
         dump_memory::<u16>("image", origin_ptr as *const u16, read);
 
+        // FIX: Cannot use `REGISTER_SIZE` constant here
         let mut registers: [u16; 10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-        let pc: Register = Register#ProgramCounter;
-        let cond: Register = Register#ConditionFlags;
-        let r7: Register = Register#R7;
-        let r0: Register = Register#R0;
-        registers[pc.discriminant()] = 12288;
+        // Initialize PC
+        registers[REGISTER_PC] = INITIAL_PC;
 
         truncate_file("instructions");
         truncate_file("registers");
 
         let mut running: bool = true;
         while running {
-            let instruction: u16 = memory.get(registers[pc.discriminant()]);
-            let opcode_value: u16 = lsr(instruction, 12);
-
-            registers[pc.discriminant()] = registers[pc.discriminant()] + 1;
+            let instruction: u16 = memory.get(registers[REGISTER_PC]);
+            let opcode: u16 = lsr(instruction, 12);
 
             dump_memory::<u16>("instructions", &instruction as *const u16, 1);
             dump_memory::<u16>("registers", &registers as *const u16, 10);
 
-            let opcode: OpCodes = opcode_from_discriminant(opcode_value);
+            // Increase PC before execution - this is a requirement.
+            registers[REGISTER_PC] = registers[REGISTER_PC] + 1;
 
-            match opcode {
-                OpCodes#Branch => {
-                    return 0;
-                },
-                OpCodes#Add => {
-                    return 1;
-                },
-                OpCodes#Load => {
-                    return 2;
-                },
-                OpCodes#Store => {
-                    return 3;
-                },
-                OpCodes#JumpRegister => {
-                    return 4;
-                },
-                OpCodes#BitwiseAnd => {
-                    return 5;
-                },
-                OpCodes#LoadRegister => {
-                    return 6;
-                },
-                OpCodes#StoreRegister => {
-                    return 7;
-                },
-                OpCodes#Unused => {
-                    return 8;
-                },
-                OpCodes#BitwiseNot => {
-                    return 9;
-                },
-                OpCodes#LoadIndirect => {
-                    return 10;
-                },
-                OpCodes#StoreIndirect => {
-                    return 11;
-                },
-                OpCodes#Jump => {
-                    return 12;
-                },
-                OpCodes#Reserved => {
-                    return 13;
-                },
-                OpCodes#LoadEffectiveAddress => {
-                    let register: u16 = and(lsr(instruction, 9), 7);
-                    let pc_offset: u16 = asr(lsl(instruction, 7) as i16, 7) as u16;
-                    registers[register] = registers[pc.discriminant()] + pc_offset;
+            // FIX: Cannot use match here (or if else)
+            // FIX: Cannot use const in binary expression
 
-                    if registers[register] == 0 {
-                        registers[cond.discriminant()] = 0;
+            let opcode_br: u16 = OPCODE_BR as u16;
+            if opcode == opcode_br {
+                return opcode;
+            };
+            let opcode_add: u16 = OPCODE_ADD as u16;
+            if opcode == opcode_add {
+                return opcode;
+            };
+            let opcode_ld: u16 = OPCODE_LD as u16;
+            if opcode == opcode_ld {
+                return opcode;
+            };
+            let opcode_st: u16 = OPCODE_ST as u16;
+            if opcode == opcode_st {
+                return opcode;
+            };
+            let opcode_jsr: u16 = OPCODE_JSR as u16;
+            if opcode == opcode_jsr {
+                return opcode;
+            };
+            let opcode_and: u16 = OPCODE_AND as u16;
+            if opcode == opcode_and {
+                return opcode;
+            };
+            let opcode_ldr: u16 = OPCODE_LDR as u16;
+            if opcode == opcode_ldr {
+                return opcode;
+            };
+            let opcode_str: u16 = OPCODE_STR as u16;
+            if opcode == opcode_str {
+                return opcode;
+            };
+            let opcode_rti: u16 = OPCODE_RTI as u16;
+            if opcode == opcode_rti {
+                return opcode;
+            };
+            let opcode_not: u16 = OPCODE_NOT as u16;
+            if opcode == opcode_not {
+                return opcode;
+            };
+            let opcode_ldi: u16 = OPCODE_LDI as u16;
+            if opcode == opcode_ldi {
+                return opcode;
+            };
+            let opcode_sti: u16 = OPCODE_STI as u16;
+            if opcode == opcode_sti {
+                return opcode;
+            };
+            let opcode_jmp: u16 = OPCODE_JMP as u16;
+            if opcode == opcode_jmp {
+                return opcode;
+            };
+            let opcode_res: u16 = OPCODE_RES as u16;
+            if opcode == opcode_res {
+                return opcode;
+            };
+            let opcode_lea: u16 = OPCODE_LEA as u16;
+            if opcode == opcode_lea {
+                let register: u16 = and(lsr(instruction, 9), 7);
+                let pc_offset: u16 = asr(lsl(instruction, 7) as i16, 7) as u16;
+                registers[register] = registers[REGISTER_PC] + pc_offset;
+
+                if registers[register] == 0 {
+                    registers[REGISTER_COND] = 0;
+                } else {
+                    // cannot inline variable
+                    let last_bit: u16 = lsr(registers[register], 15);
+                    if last_bit == 1 {
+                        registers[REGISTER_COND] = 2;
                     } else {
-                        // cannot inline variable
-                        let last_bit: u16 = lsr(registers[register], 15);
-                        if last_bit == 1 {
-                            registers[cond.discriminant()] = 2;
-                        } else {
-                            registers[cond.discriminant()] = 4;
-                        }
+                        registers[REGISTER_COND] = 4;
                     }
-                },
-                OpCodes#ExecuteTrap => {
-                    registers[r7.discriminant()] = registers[pc.discriminant()];
-                    let trap_instruction: u16 = and(instruction, 255);
+                }
+            };
+            let opcode_tra: u16 = OPCODE_TRA as u16;
+            if opcode == opcode_tra {
+                registers[REGISTER_R7] = registers[REGISTER_PC];
+                let trap_instruction: u16 = and(instruction, 255);
 
-                    if trap_instruction == 34 {
-                        let start: u16 = registers[r0.discriminant()];
+                if trap_instruction == 34 {
+                    let start: u16 = registers[REGISTER_R0];
 
-                        let mut p_c: *mut u16 = memory.at(start);
-                        let mut c: u8  = *p_c as u8;
+                    let mut p_c: *mut u16 = memory.at(start);
+                    let mut c: u8  = *p_c as u8;
 
 
-                        // c != 0 does not work!! why?
-                        while c > 0 {
-                            putchar(c as u8);
-                            p_c = p_c + 1;
-                            c = *p_c as u8;
-                        }
+                    // c != 0 does not work!! why?
+                    while c > 0 {
+                        putchar(c as u8);
+                        p_c = p_c + 1;
+                        c = *p_c as u8;
+                    }
 
-                        
-                    } else {
-                        if trap_instruction == 37 {
-                            let msg: String = "HALT";
-                            print(&msg);
-                            running = false;
-                        }
+                    
+                } else {
+                    if trap_instruction == 37 {
+                        let msg: String = "HALT";
+                        print(&msg);
+                        running = false;
                     }
                 }
             }
