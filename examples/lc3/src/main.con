@@ -3,38 +3,10 @@ mod lc3 {
     import builtins.{lsl, lsr, asr, and};
     import std.io.{print};
     import debug.{debug_string, dump_memory, truncate_file};
+    import memory.{Memory};
 
-    struct Memory {
-        data: *mut u16,
-    }
-
-    impl Memory {
-        pub fn new() -> Memory {
-            let data: *mut u16 = malloc(65536 * 2) as *mut u16;
-            let memory: Memory = Memory { data: data };
-            return memory;
-        }
-
-        pub fn at(&self, addr: u16) -> *mut u16 {
-            let target_ptr: *mut u16 = self.data + addr;
-            return target_ptr;
-        }
-
-        pub fn get(&self, addr: u16) -> u16 {
-            let target_ptr: *mut u16 = self.data + addr;
-            return *target_ptr;
-        }
-
-        pub fn set(&mut self, addr: u16, value: u16) {
-            let target_ptr: *mut u16 = self.data + addr;
-            *target_ptr = value;
-        }
-    }
-
-    fn swap16(x: u16) -> u16 {
-        // return ( x << 8 ) | ( x >> 8 )
-        return lsl(x, 8) + lsr(x, 8);
-    }
+    mod vm;
+    mod memory;
 
     const MEMORY_SIZE: u64 = 65536;
     const REGISTER_SIZE: u64 = 10;
@@ -77,34 +49,8 @@ mod lc3 {
     const INITIAL_PC: u16 = 12288;
 
     pub fn main() -> u16 {
-        let mut memory: Memory = Memory#new();
-
-        let image_path: String = "asm/hello_world.obj";
-        let mode: String = "rb";
-        let file: *mut u8 = fopen(image_path.ptr as *const u8, mode.ptr as *const u8);
-        if (file as u64) == 0 {
-            exit(1);
-        }
-
-        let mut origin: u16 = 0;
-        fread(&origin as *mut u8, 2, 1, file);
-        origin = swap16(origin);
-
-        let max_read: u64 = 65536 - (origin as u64);
-        let origin_ptr: *mut u16 = memory.at(origin);
-        let read: u64 = fread(origin_ptr as *mut u8, 2, max_read, file);
-        fclose(file);
-
-        let mut current_ptr: *mut u16 = origin_ptr;
-        let mut remaining_to_swap: u64 = read;
-        while (remaining_to_swap > 0) {
-            *current_ptr = swap16(*current_ptr);
-            current_ptr = current_ptr + 1;
-            remaining_to_swap = remaining_to_swap - 1;
-        }
-
-        truncate_file("image");
-        dump_memory::<u16>("image", origin_ptr as *const u16, read);
+        let mut memory: Memory = Memory#new(MEMORY_SIZE);
+        memory.load("asm/hello_world.obj");
 
         // FIX: Cannot use `REGISTER_SIZE` constant here
         let mut registers: [u16; 10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -208,20 +154,15 @@ mod lc3 {
                 registers[REGISTER_R7] = registers[REGISTER_PC];
                 let trap_instruction: u16 = and(instruction, 255);
 
-                if trap_instruction == 34 {
-                    let start: u16 = registers[REGISTER_R0];
+                 if trap_instruction == 34 {
 
-                    let mut p_c: *mut u16 = memory.at(start);
-                    let mut c: u8  = *p_c as u8;
-
-
-                    // c != 0 does not work!! why?
-                    while c > 0 {
-                        putchar(c as u8);
-                        p_c = p_c + 1;
-                        c = *p_c as u8;
-                    }
-
+                   let mut i: u16 = registers[REGISTER_R0];
+                   let mut c: u16 = memory.get(i); 
+                   while c > 0 {
+                       putchar(c as u8);
+                       i = i + 1;
+                       c = memory.get(i); 
+                   }
                     
                 } else {
                     if trap_instruction == 37 {
