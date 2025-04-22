@@ -113,8 +113,18 @@ mod vm {
                 };
                 let opcode_add: u16 = OPCODE_ADD as u16;
                 if opcode == opcode_add {
-                    debug_string("opcode_add");
-                    exit(opcode as i32);
+                    let r0: u16 = and(lsr(instruction, 9), 7);
+                    let r1: u16 = and(lsr(instruction, 6), 7);
+                    let imm_flag: u16 = and(lsr(instruction, 5), 1);
+
+                    if imm_flag > 0 {
+                        let imm5: u16 = sign_extend(and(instruction, 31), 5);
+                        registers[r0] = registers[r1] + imm5;
+                    } else {
+                        let r2: u16 = and(instruction, 7);
+                        registers[r0] = registers[r1] + registers[r2];
+                    }
+                    update_flags(r0);
                 };
                 let opcode_ld: u16 = OPCODE_LD as u16;
                 if opcode == opcode_ld {
@@ -133,9 +143,19 @@ mod vm {
                 };
                 let opcode_and: u16 = OPCODE_AND as u16;
                 if opcode == opcode_and {
-                    debug_string("opcode_and");
-                    exit(opcode as i32);
-                };
+                    let r0: u16 = and(lsr(instruction, 9), 7);
+                    let r1: u16 = and(lsr(instruction, 6), 7);
+                    let imm_flag: u16 = and(lsr(instruction, 5), 1);
+
+                    if imm_flag > 0 {
+                        let imm5: u16 = sign_extend(and(instruction, 31), 5);
+                        registers[r0] = and(registers[r1], imm5);
+                    } else {
+                        let r2: u16 = and(instruction, 7);
+                        registers[r0] = and(registers[r1], registers[r2]);
+                    }
+                    update_flags(r0);
+                } 
                 let opcode_ldr: u16 = OPCODE_LDR as u16;
                 if opcode == opcode_ldr {
                     debug_string("opcode_ldr");
