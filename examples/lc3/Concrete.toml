@@ -14,3 +14,4 @@ opt_level = 3
 debug_info = false
 
 [dependencies]
+std = { path = "../../std", version = "0.1.0" }
