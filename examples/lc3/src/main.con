@@ -1,3 +1,6 @@
+// This implementation of the LC3 virtual machine has been based of Justin
+// Meiners tutorial: https://www.jmeiners.com/lc3-vm/.
+
 mod lc3 {
     import memory.{Memory};
     import vm.{VirtualMachine};
