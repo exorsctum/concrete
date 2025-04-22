@@ -1,13 +1,5 @@
 mod lc3 {
-    extern fn malloc(size: u64) -> *mut u8;
-    extern fn fopen(name: *mut u8, mode: *mut u8) -> *mut u8;
-    extern fn fclose(file: *mut u8) -> i32;
-    extern fn fread(ptr: *mut u8, size: u64, nitems: u64, stream: *mut u8) -> u64;
-    extern fn fwrite(ptr: *const u8, size: u64, nitems: u64, stream: *mut u8) -> u64;
-    extern fn puts(ptr: *mut u8) -> i32;
-    extern fn putchar(c: u8) -> i32;
-    extern fn exit(status: i32);
-
+    import std.libc.{malloc, free, fopen, fclose, fread, fwrite, puts, putchar, exit};
     struct Memory {
         data: *mut u16,
     }
@@ -33,13 +25,6 @@ mod lc3 {
             let target_ptr: *mut u16 = self.data + addr;
             *target_ptr = value;
         }
-    }
-
-    #[langitem = "String"]
-    pub struct String {
-        ptr: *mut u8,
-        len: u64,
-        cap: u64,
     }
 
     fn lsl(_x: u16, _n: u16) -> u16 {
@@ -293,7 +278,7 @@ mod lc3 {
 
         let image_path: String = "asm/hello_world.obj";
         let mode: String = "rb";
-        let file: *mut u8 = fopen(image_path.ptr, mode.ptr);
+        let file: *mut u8 = fopen(image_path.ptr as *const u8, mode.ptr as *const u8);
         if (file as u64) == 0 {
             exit(1);
         }
@@ -444,7 +429,7 @@ mod lc3 {
 
     pub fn dump(path: String, ptr: *const u8, size: u64) {
         let mode: String = "ab";
-        let file: *mut u8 = fopen(path.ptr, mode.ptr);
+        let file: *mut u8 = fopen(path.ptr as *const u8, mode.ptr as *const u8);
         if (file as u64) == 0 {
             exit(1);
         }
@@ -454,7 +439,7 @@ mod lc3 {
 
     pub fn truncate(path: String) {
         let mode: String = "wb";
-        let file: *mut u8 = fopen(path.ptr, mode.ptr);
+        let file: *mut u8 = fopen(path.ptr as *const u8, mode.ptr as *const u8);
         if (file as u64) == 0 {
             exit(1);
         }
@@ -463,7 +448,7 @@ mod lc3 {
 
     pub fn print(value: String) {
         if value.len > 0 {
-            puts(value.ptr);
+            puts(value.ptr as *const u8);
         }
     }
 }
