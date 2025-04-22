@@ -175,6 +175,7 @@ mod vm {
 
                     if trap_instruction == 34 {
                         let mut i: u16 = registers[REGISTER_R0];
+                        // FIX: Inline this variable
                         let mut c: u16 = memory.get(i);
                         while c > 0 {
                             putchar(c as u8);
