@@ -1,6 +1,8 @@
 mod lc3 {
     import std.libc.{malloc, free, fopen, fclose, fread, fwrite, puts, putchar, exit};
     import builtins.{lsl, lsr, asr, and};
+    import std.io.{print};
+    import debug.{debug_string, dump_memory, truncate_file};
 
     struct Memory {
         data: *mut u16,
@@ -251,13 +253,6 @@ mod lc3 {
         let read: u64 = fread(origin_ptr as *mut u8, 2, max_read, file);
         fclose(file);
 
-        truncate("image");
-        dump(
-            "image",
-            memory.at(0) as *const u8,
-            (origin as u64) * 2 + read * 2,
-        );
-
         let mut current_ptr: *mut u16 = origin_ptr;
         let mut remaining_to_swap: u64 = read;
         while (remaining_to_swap > 0) {
@@ -266,12 +261,8 @@ mod lc3 {
             remaining_to_swap = remaining_to_swap - 1;
         }
 
-        truncate("memory");
-        dump(
-            "memory",
-            memory.at(0) as *const u8,
-            (origin as u64) * 2 + read * 2,
-        );
+        truncate_file("image");
+        dump_memory::<u16>("image", origin_ptr as *const u16, read);
 
         let mut registers: [u16; 10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -281,7 +272,9 @@ mod lc3 {
         let r0: Register = Register#R0;
         registers[pc.discriminant()] = 12288;
 
-        truncate("instructions");
+        truncate_file("instructions");
+        truncate_file("registers");
+
         let mut running: bool = true;
         while running {
             let instruction: u16 = memory.get(registers[pc.discriminant()]);
@@ -289,7 +282,8 @@ mod lc3 {
 
             registers[pc.discriminant()] = registers[pc.discriminant()] + 1;
 
-            dump("instructions", &instruction as *const u8, 2);
+            dump_memory::<u16>("instructions", &instruction as *const u16, 1);
+            dump_memory::<u16>("registers", &registers as *const u16, 10);
 
             let opcode: OpCodes = opcode_from_discriminant(opcode_value);
 
@@ -374,7 +368,8 @@ mod lc3 {
                         
                     } else {
                         if trap_instruction == 37 {
-                            print("HALT");
+                            let msg: String = "HALT";
+                            print(&msg);
                             running = false;
                         }
                     }
@@ -382,35 +377,7 @@ mod lc3 {
             }
         }
 
-        truncate("final");
-        dump("final", memory.at(0) as *const u8, 65536 * 2);
-
         return 0;
-    }
-
-    pub fn dump(path: String, ptr: *const u8, size: u64) {
-        let mode: String = "ab";
-        let file: *mut u8 = fopen(path.ptr as *const u8, mode.ptr as *const u8);
-        if (file as u64) == 0 {
-            exit(1);
-        }
-        fwrite(ptr, size, 1, file);
-        fclose(file);
-    }
-
-    pub fn truncate(path: String) {
-        let mode: String = "wb";
-        let file: *mut u8 = fopen(path.ptr as *const u8, mode.ptr as *const u8);
-        if (file as u64) == 0 {
-            exit(1);
-        }
-        fclose(file);
-    }
-
-    pub fn print(value: String) {
-        if value.len > 0 {
-            puts(value.ptr as *const u8);
-        }
     }
 }
 
@@ -459,5 +426,34 @@ mod builtins {
             i = i + 1;
         }
         return z;
+    }
+}
+
+mod debug {
+    import std.libc.{puts, fopen, fclose, fwrite, exit};
+    import std.string.{String};
+    import std.mem.{sizeof};
+
+    pub fn debug_string(value: String) {
+        puts(value.ptr as *const u8);
+    }
+
+    pub fn truncate_file(path: String) {
+        let mode: String = "wb";
+        let file: *mut u8 = fopen(path.ptr as *const u8, mode.ptr as *const u8);
+        if (file as u64) == 0 {
+            exit(1);
+        }
+        fclose(file);
+    }
+
+    pub fn dump_memory<T>(path: String, ptr: *const T, length: u64) {
+        let mode: String = "ab";
+        let file: *mut u8 = fopen(path.ptr as *const u8, mode.ptr as *const u8);
+        if (file as u64) == 0 {
+            exit(1);
+        }
+        fwrite(ptr as *const u8, sizeof::<T>(), length, file);
+        fclose(file);
     }
 }
