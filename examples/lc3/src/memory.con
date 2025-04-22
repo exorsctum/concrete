@@ -7,12 +7,14 @@ mod memory {
     pub struct Memory {
         // FIX: Use static array
         pub data: *mut u16,
+        pub size: u64,
     }
 
     impl Memory {
         pub fn new(size: u64) -> Memory {
             let memory: Memory = Memory {
                 data: realloc::<u16>(0 as *mut u16, size),
+                size: size,
             };
             return memory;
         }
@@ -36,7 +38,7 @@ mod memory {
             fread(&origin as *mut u8, 2, 1, file);
             origin = swap16(origin);
 
-            let max_read: u64 = 65536 - (origin as u64);
+            let max_read: u64 = self.size - (origin as u64);
             let origin_ptr: *mut u16 = self.data + origin;
             let read: u64 = fread(origin_ptr as *mut u8, 2, max_read, file);
             fclose(file);
@@ -49,6 +51,7 @@ mod memory {
                 remaining_to_swap = remaining_to_swap - 1;
             }
 
+            // HACK: Only for debugging.
             truncate_file("image");
             dump_memory::<u16>("image", origin_ptr as *const u16, read);
         }

@@ -12,6 +12,7 @@ mod lc3 {
     }
 }
 
+// This module contains operation that should be builtin into the language.
 mod builtins {
     fn lsl(x: u16, n: u16) -> u16 {
         let mut x_mut: u16 = x;
@@ -60,6 +61,7 @@ mod builtins {
     }
 }
 
+// This module contains debugging functions.
 mod debug {
     import std.libc.{puts, fopen, fclose, fwrite, exit};
     import std.string.{String};

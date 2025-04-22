@@ -43,10 +43,19 @@ mod vm {
     const CONDITION_FLAG_ZERO: u16 = 2;
     const CONDITION_FLAG_NEG: u16 = 4;
 
+    // FIX: It would be great to use an Enum here
+    const TRAP_GETC: u16 = 32;
+    const TRAP_OUT: u16 = 33;
+    const TRAP_PUTS: u16 = 34;
+    const TRAP_IN: u16 = 35;
+    const TRAP_PUTSP: u16 = 36;
+    const TRAP_HALT: u16 = 37;
+
     const INITIAL_PC: u16 = 12288;
 
     pub struct VirtualMachine {
         memory: Memory,
+        // FIX: Cannot use `REGISTER_SIZE` constant here
         registers: [u16; 10],
     }
 
@@ -76,8 +85,11 @@ mod vm {
             // because the memory is heap allocated.
             let mut memory: Memory = self.memory;
             let mut registers: [u16; 10] = self.registers;
-            registers[REGISTER_PC] = INITIAL_PC;
 
+            registers[REGISTER_PC] = INITIAL_PC;
+            registers[REGISTER_COND] = CONDITION_FLAG_ZERO;
+
+            // HACK: Only for debugging.
             truncate_file("instructions");
             truncate_file("registers");
 
@@ -85,6 +97,7 @@ mod vm {
                 let instruction: u16 = memory.get(registers[REGISTER_PC]);
                 let opcode: u16 = lsr(instruction, 12);
 
+                // HACK: Only for debugging.
                 dump_memory::<u16>("instructions", &instruction as *const u16, 1);
                 dump_memory::<u16>("registers", &registers as *const u16, 10);
 
@@ -93,7 +106,6 @@ mod vm {
 
                 // FIX: Cannot use match here (or if else)
                 // FIX: Cannot use const in binary expression
-
                 let opcode_br: u16 = OPCODE_BR as u16;
                 if opcode == opcode_br {
                     return opcode as i32;
@@ -171,9 +183,18 @@ mod vm {
                 let opcode_tra: u16 = OPCODE_TRA as u16;
                 if opcode == opcode_tra {
                     registers[REGISTER_R7] = registers[REGISTER_PC];
-                    let trap_instruction: u16 = and(instruction, 255);
+                    let trap_code: u16 = and(instruction, 255);
 
-                    if trap_instruction == 34 {
+                    let trap_getc: u16 = TRAP_GETC;
+                    if trap_code == trap_getc {
+                        return trap_code as i32;
+                    }
+                    let trap_out: u16 = TRAP_OUT;
+                    if trap_code == trap_out {
+                        return trap_code as i32;
+                    }
+                    let trap_puts: u16 = TRAP_PUTS;
+                    if trap_code == trap_puts {
                         let mut i: u16 = registers[REGISTER_R0];
                         // FIX: Inline this variable
                         let mut c: u16 = memory.get(i);
@@ -182,12 +203,20 @@ mod vm {
                             i = i + 1;
                             c = memory.get(i);
                         }
-                    } else {
-                        if trap_instruction == 37 {
-                            let msg: String = "HALT";
-                            print(&msg);
-                            return 0;
-                        }
+                    }
+                    let trap_in: u16 = TRAP_IN;
+                    if trap_code == trap_in {
+                        return trap_code as i32;
+                    }
+                    let trap_putsp: u16 = TRAP_PUTSP;
+                    if trap_code == trap_putsp {
+                        return trap_code as i32;
+                    }
+                    let trap_halt: u16 = TRAP_HALT;
+                    if trap_code == trap_halt {
+                        let msg: String = "HALT";
+                        print(&msg);
+                        return 0;
                     }
                 }
             }
