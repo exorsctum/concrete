@@ -1,5 +1,7 @@
 mod lc3 {
     import std.libc.{malloc, free, fopen, fclose, fread, fwrite, puts, putchar, exit};
+    import builtins.{lsl, lsr, asr, and};
+
     struct Memory {
         data: *mut u16,
     }
@@ -25,49 +27,6 @@ mod lc3 {
             let target_ptr: *mut u16 = self.data + addr;
             *target_ptr = value;
         }
-    }
-
-    fn lsl(_x: u16, _n: u16) -> u16 {
-        let mut x: u16 = _x;
-        let mut n: u16 = _n;
-        while n > 0 {
-            x = x * 2;
-            n = n - 1;
-        }
-        return x;
-    }
-    fn lsr(_x: u16, _n: u16) -> u16 {
-        let mut x: u16 = _x;
-        let mut n: u16 = _n;
-        while n > 0 {
-            x = x / 2;
-            n = n - 1;
-        }
-        return x;
-    }
-    fn asr(_x: i16, _n: i16) -> i16 {
-        let mut x: i16 = _x;
-        let mut n: i16 = _n;
-        while n > 0 {
-            x = x / 2;
-            n = n - 1;
-        }
-        return x;
-    }
-    fn and(x: u16, y: u16) -> u16 {
-        let mut i: u16 = 0;
-        let mut z: u16 = 0;
-        while i < 16 {
-            let xi: u16 = lsr(lsl(x, 15 - i), 15);
-            let yi: u16 = lsr(lsl(y, 15 - i), 15);
-            if xi > 0 {
-                if yi > 0 {
-                    z = z + lsl(1, i);
-                }
-            }
-            i = i + 1;
-        }
-        return z;
     }
 
     fn swap16(x: u16) -> u16 {
@@ -385,7 +344,9 @@ mod lc3 {
                     if registers[register] == 0 {
                         registers[cond.discriminant()] = 0;
                     } else {
-                        if lsr(registers[register], 15) == 1 {
+                        // cannot inline variable
+                        let last_bit: u16 = lsr(registers[register], 15);
+                        if last_bit == 1 {
                             registers[cond.discriminant()] = 2;
                         } else {
                             registers[cond.discriminant()] = 4;
@@ -450,5 +411,51 @@ mod lc3 {
         if value.len > 0 {
             puts(value.ptr as *const u8);
         }
+    }
+}
+
+mod builtins {
+    fn lsl(x: u16, n: u16) -> u16 {
+        let mut x_mut: u16 = x;
+        let mut n_mut: u16 = n;
+        while n_mut > 0 {
+            x_mut = x_mut * 2;
+            n_mut = n_mut - 1;
+        }
+        return x_mut;
+    }
+    fn lsr(x: u16, n: u16) -> u16 {
+        let mut x_mut: u16 = x;
+        let mut n_mut: u16 = n;
+        while n_mut > 0 {
+            x_mut = x_mut / 2;
+            n_mut = n_mut - 1;
+        }
+        return x_mut;
+    }
+    fn asr(x: i16, n: u16) -> i16 {
+        let mut x_mut: i16 = x;
+        let mut n_mut: u16 = n;
+        while n_mut > 0 {
+            x_mut = x_mut / 2;
+            n_mut = n_mut - 1;
+        }
+        return x_mut;
+    }
+    fn and(x: u16, y: u16) -> u16 {
+        let mut i: u16 = 0;
+        let mut z: u16 = 0;
+        while i < 16 {
+            let xi: u16 = lsr(lsl(x, 15 - i), 15);
+            let yi: u16 = lsr(lsl(y, 15 - i), 15);
+            // cannot use and gates in conditional
+            if xi > 0 {
+                if yi > 0 {
+                    z = z + lsl(1, i);
+                }
+            }
+            i = i + 1;
+        }
+        return z;
     }
 }
