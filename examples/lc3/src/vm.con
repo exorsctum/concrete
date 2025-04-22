@@ -216,8 +216,8 @@ mod vm {
                     }
                     let trap_out: u16 = TRAP_OUT;
                     if trap_code == trap_out {
-                        debug_string("trap_out");
-                        exit(trap_code as i32);
+                        let mut c: u16 = registers[REGISTER_R0];
+                        putchar(c as u8);
                     }
                     let trap_puts: u16 = TRAP_PUTS;
                     if trap_code == trap_puts {
