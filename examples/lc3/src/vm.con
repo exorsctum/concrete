@@ -164,21 +164,11 @@ mod vm {
                 };
                 let opcode_lea: u16 = OPCODE_LEA as u16;
                 if opcode == opcode_lea {
-                    let register: u16 = and(lsr(instruction, 9), 7);
-                    let pc_offset: u16 = asr(lsl(instruction, 7) as i16, 7) as u16;
-                    registers[register] = registers[REGISTER_PC] + pc_offset;
+                    let r0: u16 = and(lsr(instruction, 9), 7);
+                    let pc_offset: u16 = sign_extend(instruction, 7);
+                    registers[r0] = registers[REGISTER_PC] + pc_offset;
 
-                    if registers[register] == 0 {
-                        registers[REGISTER_COND] = 0;
-                    } else {
-                        // FIX: Inline this variable
-                        let last_bit: u16 = lsr(registers[register], 15);
-                        if last_bit == 1 {
-                            registers[REGISTER_COND] = 2;
-                        } else {
-                            registers[REGISTER_COND] = 4;
-                        }
-                    }
+                    registers[REGISTER_COND] = update_flags(registers[r0]);
                 };
                 let opcode_tra: u16 = OPCODE_TRA as u16;
                 if opcode == opcode_tra {
@@ -223,5 +213,23 @@ mod vm {
                 // FIX: Add else clause
             }
         }
+    }
+
+    fn sign_extend(x: u16, n: u16) -> u16 {
+        return asr(lsl(x, 16-n) as i16, 16-n) as u16;
+    }
+
+    fn update_flags(x: u16) -> u16 {
+        if x == 0 {
+            return CONDITION_FLAG_ZERO;
+        }
+
+        // FIX: Inline this variable
+        let last_bit: u16 = lsr(x, 15);
+        if last_bit == 1 {
+            return CONDITION_FLAG_NEG;
+        }
+
+        return CONDITION_FLAG_POS;
     }
 }
