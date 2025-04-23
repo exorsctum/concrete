@@ -200,8 +200,8 @@ mod vm {
                 };
                 let opcode_jmp: u16 = OPCODE_JMP as u16;
                 if opcode == opcode_jmp {
-                    debug_string("opcode_jmp");
-                    exit(opcode as i32);
+                    let r1: u16 = and(lsr(instruction, 6), 7);
+                    registers[REGISTER_PC] = registers[r1];
                 };
                 let opcode_res: u16 = OPCODE_RES as u16;
                 if opcode == opcode_res {
