@@ -176,8 +176,11 @@ mod vm {
                 } 
                 let opcode_ldr: u16 = OPCODE_LDR as u16;
                 if opcode == opcode_ldr {
-                    debug_string("opcode_ldr");
-                    exit(opcode as i32);
+                    let r0: u16 = and(lsr(instruction, 9), 7);
+                    let r1: u16 = and(lsr(instruction, 6), 7);
+                    let offset: u16 = sign_extend(and(instruction, 63), 6);
+                    registers[r0] = memory.get(registers[r1] + offset);
+                    registers[REGISTER_COND] = update_flags(registers[r0]);
                 };
                 let opcode_str: u16 = OPCODE_STR as u16;
                 if opcode == opcode_str {
