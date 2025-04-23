@@ -1,7 +1,7 @@
 mod vm {
     import std.libc.{exit, putchar};
     import std.io.{print};
-    import builtins.{lsr, lsl, asr, and};
+    import builtins.{lsr, lsl, asr, and, not};
     import debug.{debug_string, dump_memory, truncate_file};
     import lc3.memory.{Memory};
 
@@ -173,9 +173,13 @@ mod vm {
                 };
                 let opcode_not: u16 = OPCODE_NOT as u16;
                 if opcode == opcode_not {
-                    debug_string("opcode_not");
-                    exit(opcode as i32);
-                };
+                    let r0: u16 = and(lsr(instruction, 9), 7);
+                    let r1: u16 = and(lsr(instruction, 6), 7);
+
+                    registers[r0] = not(registers[r1]);
+
+                    registers[REGISTER_COND] = update_flags(registers[r0]);
+                }
                 let opcode_ldi: u16 = OPCODE_LDI as u16;
                 if opcode == opcode_ldi {
                     debug_string("opcode_ldi");
