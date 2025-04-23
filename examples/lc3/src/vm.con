@@ -142,8 +142,9 @@ mod vm {
                 };
                 let opcode_st: u16 = OPCODE_ST as u16;
                 if opcode == opcode_st {
-                    debug_string("opcode_st");
-                    exit(opcode as i32);
+                    let r0: u16 = and(lsr(instruction, 9), 7);
+                    let pc_offset: u16 = sign_extend(and(instruction, 511), 9);
+                    memory.set(registers[REGISTER_PC] + pc_offset, registers[r0]);
                 };
                 let opcode_jsr: u16 = OPCODE_JSR as u16;
                 if opcode == opcode_jsr {

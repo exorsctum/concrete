@@ -29,6 +29,11 @@ mod memory {
             return *ptr;
         }
 
+        pub fn set(&self, addr: u16, value: u16) {
+            let ptr: *mut u16 = self.data + addr;
+            *ptr = value;
+        }
+
         // FIX: This whole function is very unsafe.
         pub fn load(&mut self, image_path: String) {
             let mode: String = "rb";
