@@ -39,7 +39,7 @@ mod vm {
     const OPCODE_TRA: u16 = 15;
 
     // FIX: It would be great to use an Enum here
-    const CONDITION_FLAG_POS: u16 = 0;
+    const CONDITION_FLAG_POS: u16 = 1;
     const CONDITION_FLAG_ZERO: u16 = 2;
     const CONDITION_FLAG_NEG: u16 = 4;
 
@@ -108,8 +108,13 @@ mod vm {
                 // FIX: Cannot use const in binary expression
                 let opcode_br: u16 = OPCODE_BR as u16;
                 if opcode == opcode_br {
-                    debug_string("opcode_br");
-                    exit(opcode as i32);
+                    let pc_offset: u16 = sign_extend(and(instruction, 511), 9);
+                    let cond_flag: u16 = and(lsr(instruction, 9), 7);
+
+                    let should_jump: u16 = and(cond_flag, registers[REGISTER_COND]);
+                    if should_jump > 0 {
+                        registers[REGISTER_PC] = registers[REGISTER_PC] + pc_offset;
+                    }
                 };
                 let opcode_add: u16 = OPCODE_ADD as u16;
                 if opcode == opcode_add {
@@ -124,7 +129,7 @@ mod vm {
                         let r2: u16 = and(instruction, 7);
                         registers[r0] = registers[r1] + registers[r2];
                     }
-                    update_flags(r0);
+                    registers[REGISTER_COND] = update_flags(registers[r0]);
                 };
                 let opcode_ld: u16 = OPCODE_LD as u16;
                 if opcode == opcode_ld {
@@ -154,7 +159,7 @@ mod vm {
                         let r2: u16 = and(instruction, 7);
                         registers[r0] = and(registers[r1], registers[r2]);
                     }
-                    update_flags(r0);
+                    registers[REGISTER_COND] = update_flags(registers[r0]);
                 } 
                 let opcode_ldr: u16 = OPCODE_LDR as u16;
                 if opcode == opcode_ldr {
