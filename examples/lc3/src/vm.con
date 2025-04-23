@@ -182,8 +182,11 @@ mod vm {
                 }
                 let opcode_ldi: u16 = OPCODE_LDI as u16;
                 if opcode == opcode_ldi {
-                    debug_string("opcode_ldi");
-                    exit(opcode as i32);
+                    let r0: u16 = and(lsr(instruction, 9), 7);
+                    let pc_offset: u16 = sign_extend(and(instruction, 511), 9);
+
+                    registers[r0] = memory.get(memory.get(registers[REGISTER_PC] + pc_offset));
+                    registers[REGISTER_COND] = update_flags(registers[r0]);
                 };
                 let opcode_sti: u16 = OPCODE_STI as u16;
                 if opcode == opcode_sti {
@@ -203,7 +206,7 @@ mod vm {
                 let opcode_lea: u16 = OPCODE_LEA as u16;
                 if opcode == opcode_lea {
                     let r0: u16 = and(lsr(instruction, 9), 7);
-                    let pc_offset: u16 = sign_extend(instruction, 7);
+                    let pc_offset: u16 = sign_extend(and(instruction, 511), 9);
                     registers[r0] = registers[REGISTER_PC] + pc_offset;
 
                     registers[REGISTER_COND] = update_flags(registers[r0]);
