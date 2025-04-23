@@ -12,4 +12,5 @@ mod libc {
     extern fn fwrite(ptr: *const u8, size: u64, nitems: u64, stream: *mut u8) -> u64;
     extern fn exit(status: i32);
     extern fn raise(signal: i32);
+    extern fn getchar() -> u32;
 }
