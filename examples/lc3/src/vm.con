@@ -133,8 +133,12 @@ mod vm {
                 };
                 let opcode_ld: u16 = OPCODE_LD as u16;
                 if opcode == opcode_ld {
-                    debug_string("opcode_ld");
-                    exit(opcode as i32);
+                    let r0: u16 = and(lsr(instruction, 9), 7);
+                    let pc_offset: u16 = sign_extend(and(instruction, 511), 9);
+
+                    registers[r0] = memory.get(registers[REGISTER_PC] + pc_offset);
+
+                    registers[REGISTER_COND] = update_flags(registers[r0]);
                 };
                 let opcode_st: u16 = OPCODE_ST as u16;
                 if opcode == opcode_st {
