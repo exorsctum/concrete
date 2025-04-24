@@ -1,5 +1,5 @@
 mod vm {
-    import std.libc.{exit, putchar};
+    import std.libc.{exit, putchar, getchar};
     import std.io.{print};
     import builtins.{lsr, lsl, asr, and, not};
     import debug.{debug_string, dump_memory, truncate_file};
@@ -242,8 +242,8 @@ mod vm {
 
                     let trap_getc: u16 = TRAP_GETC;
                     if trap_code == trap_getc {
-                        debug_string("trap_getc");
-                        exit(trap_code as i32);
+                        registers[REGISTER_R0] = getchar() as u16;
+                        registers[REGISTER_COND] = update_flags(registers[REGISTER_R0]);
                     }
                     let trap_out: u16 = TRAP_OUT;
                     if trap_code == trap_out {
