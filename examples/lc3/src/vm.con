@@ -263,13 +263,26 @@ mod vm {
                     }
                     let trap_in: u16 = TRAP_IN;
                     if trap_code == trap_in {
-                        debug_string("trap_in");
-                        exit(trap_code as i32);
+                        let c: u32 = getchar();
+                        putchar(c as u8);
+                        registers[REGISTER_R0] = c as u16;
+                        registers[REGISTER_COND] = update_flags(registers[REGISTER_R0]);
                     }
                     let trap_putsp: u16 = TRAP_PUTSP;
                     if trap_code == trap_putsp {
-                        debug_string("trap_putsp");
-                        exit(trap_code as i32);
+                        let mut i: u16 = registers[REGISTER_R0];
+                        // FIX: Inline this variable
+                        let mut c: u16 = memory.get(i);
+                        while c > 0 {
+                            let c1: u8 = and(c,255) as u8;
+                            putchar(c1);
+                            let c2: u8 = lsr(c,8) as u8;
+                            if c2 > 0 {
+                                putchar(c2);
+                            }
+                            i = i + 1;
+                            c = memory.get(i);
+                        }
                     }
                     let trap_halt: u16 = TRAP_HALT;
                     if trap_code == trap_halt {
