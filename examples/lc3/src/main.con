@@ -2,6 +2,10 @@
 // Meiners tutorial: https://www.jmeiners.com/lc3-vm/.
 
 mod lc3 {
+    mod input;
+    mod memory;
+    mod vm;
+
     import memory.{Memory};
     import vm.{VirtualMachine};
     import std.io.{print};
@@ -9,9 +13,6 @@ mod lc3 {
     import std.string.{String};
     import input.{disable_input_buffering};
 
-    mod memory;
-    mod vm;
-    mod input;
 
     pub fn main(argc: u32, argv: *const *const u8) -> i32 {
         if (argc < 2) {

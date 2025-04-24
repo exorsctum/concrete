@@ -1,8 +1,12 @@
 mod memory {
     import std.alloc.{realloc, free};
-    import std.libc.{fopen, fread, fclose};
+    import std.libc.{fopen, fread, fclose, getchar};
     import builtins.{lsl, lsr};
     import debug.{dump_memory, truncate_file};
+    import lc3.input.{check_key};
+
+    const MR_KBSR: u16 = 65024;
+    const MR_KBDR: u16 = 65026;
 
     pub struct Memory {
         // FIX: Use static array
@@ -25,6 +29,19 @@ mod memory {
         }
 
         pub fn get(&self, addr: u16) -> u16 {
+            let mr_kbsr: u16 = MR_KBSR;
+            if addr == mr_kbsr {
+                let sr_ptr: *mut u16 = self.data + MR_KBSR;
+                let pressed: u32 = check_key();
+                if pressed > 0 {
+                    let dr_ptr: *mut u16 = self.data + MR_KBDR;
+                    *sr_ptr = lsl(1, 15);
+                    *dr_ptr = getchar() as u16;
+                } else {
+                    *sr_ptr = 0;
+                }
+            }
+
             let ptr: *mut u16 = self.data + addr;
             return *ptr;
         }
