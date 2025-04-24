@@ -1,0 +1,32 @@
+mod input {
+    import builtins.{and64, not64};
+
+    pub struct termios {
+		c_iflag: u64,           /* input flags */
+		c_oflag: u64,           /* output flags */
+		c_cflag: u64,           /* control flags */
+		c_lflag: u64,           /* local flags */
+		c_cc: *mut [u8; 20],    /* control chars */
+		c_ispeed: u64,          /* input speed */
+		c_ospeed: u64,          /* output speed */
+    }
+
+    extern fn tcgetattr(fildes: u32, termios_p: *mut termios) -> u32;
+    extern fn tcsetattr(fildes: u32, optional_actions: u32, termios_p: *mut termios) -> u32;
+
+    pub fn disable_input_buffering() {
+        let original_tio: termios = termios {
+            c_iflag: 0,
+            c_oflag: 0,
+            c_cflag: 0,
+            c_lflag: 0,
+            c_cc: 0,
+            c_ispeed: 0,
+            c_ospeed: 0,
+        };
+        tcgetattr(0, &original_tio as *mut termios);
+        let mut new_tio: termios = original_tio;
+        new_tio.c_lflag = and64(new_tio.c_lflag, and64(not64(256), not64(8)));
+        tcsetattr(0, 0, &new_tio as *mut termios);
+    }
+}

@@ -7,9 +7,11 @@ mod lc3 {
     import std.io.{print};
     import std.libc.{exit};
     import std.string.{String};
+    import input.{disable_input_buffering};
 
     mod memory;
     mod vm;
+    mod input;
 
     pub fn main(argc: u32, argv: *const *const u8) -> i32 {
         if (argc < 2) {
@@ -17,6 +19,8 @@ mod lc3 {
             print(&message);
             exit(1);
         }
+
+        disable_input_buffering();
 
         let vm: VirtualMachine = VirtualMachine#new();
 
@@ -84,6 +88,54 @@ mod builtins {
         return z;
     }
     fn not(x: u16) -> u16 {
+        return -x - 1;
+    }
+    fn lsl64(x: u64, n: u64) -> u64 {
+        let mut x_mut: u64 = x;
+        let mut n_mut: u64 = n;
+        while n_mut > 0 {
+            x_mut = x_mut * 2;
+            n_mut = n_mut - 1;
+        }
+        return x_mut;
+    }
+    fn lsr64(x: u64, n: u64) -> u64 {
+        let mut x_mut: u64 = x;
+        let mut n_mut: u64 = n;
+        while n_mut > 0 {
+            x_mut = x_mut / 2;
+            n_mut = n_mut - 1;
+        }
+        return x_mut;
+    }
+    fn asr64(x: i64, n: u64) -> i64 {
+        let mut x_mut: i64 = x;
+        let mut n_mut: u64 = n;
+        while n_mut > 0 {
+            x_mut = x_mut / 2;
+            n_mut = n_mut - 1;
+        }
+        return x_mut;
+    }
+    fn and64(x: u64, y: u64) -> u64 {
+        let mut i: u64 = 0;
+        let mut z: u64 = 0;
+        while i < 64 {
+            // keep bit at index i
+            let xi: u64 = lsr64(lsl64(x, 63 - i), 64);
+            let yi: u64 = lsr64(lsl64(y, 63 - i), 64);
+            // cannot use and gates in conditional
+            if xi > 0 {
+                if yi > 0 {
+                    // set bit at index i on z
+                    z = z + lsl64(1, i);
+                }
+            }
+            i = i + 1;
+        }
+        return z;
+    }
+    fn not64(x: u64) -> u64 {
         return -x - 1;
     }
 }
